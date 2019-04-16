@@ -6,12 +6,6 @@ import argparse
 import os
 import time
 
-import onmt.model_builder
-import onmt.translate
-import onmt.translate.beam
-from onmt.translate.translator import build_translator
-from onmt.utils.logging import init_logger
-
 from net.wyun.blankanswer import image_utils
 
 default_buckets = '[[240,100], [320,80], [400,80],[400,100], [480,80], [480,100], [560,80], [560,100], [640,80],[640,100],\
@@ -33,13 +27,8 @@ def get_model_api():
 
     # initialize config for translate
     parser = argparse.ArgumentParser(description='translate.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    onmt.opts.add_md_help_argument(parser)
-    onmt.opts.translate_opts(parser)
-
     opt = parser.parse_args()
 
-    logger = init_logger(opt.log_file)
-    translator = build_translator(opt, report_score=False)
 
     def model_api(request_id, filename, return_list):
         """
@@ -77,26 +66,24 @@ def get_model_api():
         # print "src=", src
         # print "src_dir=", src_dir
 
-        all_scores, n_best_preds = translator.translate(src=opt.src, tgt=None, src_dir=opt.src_dir,
-                                                        batch_size=opt.batch_size, attn_debug=opt.attn_debug)
+        #all_scores, n_best_preds = translator.translate(src=opt.src, tgt=None, src_dir=opt.src_dir,
+        #                                                batch_size=opt.batch_size, attn_debug=opt.attn_debug)
+        # hasAnswer: 1 means that there is answer in image; 0 means not
+        hasAnswer = 0
 
         now_t = current_milli_time()
+        if now_t % 2 == 0:
+            hasAnswer = 0
+        else:
+            hasAnswer = 1
+
         if debug:
             print "time spent ", now_t - start_t
-
-        # process the output
-        n_best_latex = []
-        for pred in n_best_preds[0]:
-            # print "pred:",  pred, type(pred)
-            n_best_latex.append(detokenizer(''.join(pred)))
 
         # return the output for the api
         res['status'] = "success"
         res['info'] = now_t - start_t
-        res['mathml'] = ''
-        res['latex'] = n_best_latex[0]
-        res['n_best_latex'] = n_best_latex
-        # app.logger.debug(str(request_id)+"\t"+n_best_latex[0]+"\n");
+        res['has_answer'] = hasAnswer
         return_list.append(res)
         # return res
 
