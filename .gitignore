@@ -31,6 +31,9 @@ MANIFEST
 *.manifest
 *.spec
 
+#uploads folder
+uploads/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
