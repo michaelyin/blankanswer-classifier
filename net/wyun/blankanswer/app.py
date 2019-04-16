@@ -13,7 +13,7 @@ from PIL import Image
 import cv2
 import numpy as np
 
-from serve import get_model_api
+from worker import get_model_api
 
 
 # define the app
@@ -33,7 +33,7 @@ model_api = get_model_api()
 
 
 # API route
-@app.route('/print/mathreco', methods=['POST'])
+@app.route('/answer/blank', methods=['POST'])
 def mathreco():
     """API function
 
@@ -123,9 +123,10 @@ if __name__ == '__main__':
         app.logger.info("default timout "+str(timeout_secs))
     try:
         mathreco_port=int(os.environ["MATHRECO_PORT"])
+        print "port: ", mathreco_port
         app.logger.info("port "+str(mathreco_port))
     except:
-        mathreco_port=8080;
+        mathreco_port=8686;
         app.logger.info("default port 8080")
     # This is used when running locally.
     app.run(host='0.0.0.0',port=mathreco_port, debug=True)
