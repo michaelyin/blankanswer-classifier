@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Essentials: developer tools, build tools, OpenBLAS
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    apt-utils git curl vim unzip openssh-client wget \
+    apt-utils git curl \
     build-essential cmake \
     libopenblas-dev
 
@@ -27,7 +27,8 @@ RUN apt-get install -y --no-install-recommends libjpeg-dev zlib1g-dev && \
 RUN pip3 --no-cache-dir install \
     numpy scipy sklearn scikit-image pandas matplotlib Cython requests
 
-
+RUN pip3 --no-cache-dir install \
+    flask flask_cors
 
 #
 # OpenCV 3.4.1
@@ -55,8 +56,6 @@ RUN cd /usr/local/src/opencv && mkdir build && cd build && \
 COPY . /app
 WORKDIR /app
 
-RUN pip3 --no-cache-dir install \
-    flask flask_cors
 #RUN export PYTHONPATH="$(printf "%s:" ./net/wyun/*/)"
 ENV PYTHONPATH="$PYTHONPATH:/app"
 ENTRYPOINT ["python3", "./net/wyun/blankanswer/app.py"]
