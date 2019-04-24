@@ -8,6 +8,7 @@ import time
 import cv2
 
 from net.wyun.blankanswer import image_utils
+from net.wyun.blankanswer.loader import SimplePreprocessor
 
 default_buckets = '[[240,100], [320,80], [400,80],[400,100], [480,80], [480,100], [560,80], [560,100], [640,80],[640,100],\
  [720,80], [720,100], [720,120], [720, 200], [800,100],[800,320], [1000,200]]'
@@ -21,6 +22,7 @@ headers = {'content-type': 'application/json'}
 from flask import Flask
 
 app = Flask(__name__)
+imageP = SimplePreprocessor.SimplePreprocessor(240, 95)
 
 
 def get_model_api():
@@ -54,7 +56,7 @@ def get_model_api():
         # preprocess image
         # os.system('echo '+ str(request_id)+'_preprocessed.png ' +'>uploads/test.txt');
         os.system('echo ' + filename + '>uploads/test.txt');
-        print filename
+        print (filename)
         # src=  'uploads/test.txt'
         # src_dir='uploads'
         # print "src=", src
@@ -70,7 +72,7 @@ def get_model_api():
         (isSuccess, hasAnswer, errmsg) = has_answer(filename)
 
         if debug:
-            print "time spent ", now_t - start_t
+            print ("time spent ", now_t - start_t)
 
         # return the output for the api
         if isSuccess:
@@ -91,7 +93,7 @@ def get_model_api():
     return model_api
 
 
-Threshold = 1.55e-05
+Threshold = 5.0e-05
 def has_answer(imagePath):
     '''
 
@@ -100,11 +102,14 @@ def has_answer(imagePath):
     '''
     image = cv2.imread(imagePath)
     height, width, depth = image.shape
-    if height < 45 or width < 45 or height > 1000 or width > 1000:
-        return (False, False, "image size should be (45, 45) to (1000, 1000)")
+    if height < 15 or width < 45 or height > 1000 or width > 1000:
+        return (False, False, "image size (widthxheight) should be (45, 45) to (1000, 1000)")
 
+    image = imageP.preprocess(image)
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     ret, th = cv2.threshold(gray_image, 0, 255, cv2.THRESH_OTSU)
+    white_left_right(th)
     mask_inv = cv2.bitwise_not(th)
 
     # calculate moments of binary image
@@ -113,19 +118,25 @@ def has_answer(imagePath):
 
     # calculate x,y coordinate of center
     if M["m00"] == 0:
-        print "m00 is 0", imagePath
+        print ("m00 is 0", imagePath)
         return (False, False, "m00 is 0, bad format image!")
 
     #cX = int(M["m10"] / M["m00"])
     #cY = int(M["m01"] / M["m00"])
 
     nu02 = M["nu02"]
-    print "nu02", nu02
+    print ("nu02", nu02)
     hasAnswer = True
     if nu02 < Threshold:
         hasAnswer = False
     return (True, hasAnswer, "")
 
+def white_left_right(image):
+    for ind in range(25):
+        image[:, ind] = 255
+
+    for ind in range(215, 240, 1):
+        image[:, ind] = 255
 
 def preprocess(l):
     filename, postfix, output_filename, crop_blank_default_size, pad_size, buckets, downsample_ratio = l

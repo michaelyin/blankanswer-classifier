@@ -57,7 +57,7 @@ def mathreco():
 
     if color_space !=  'sRGB':
         img = cv2.imread(filename)
-	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img2 = np.zeros_like(img)
         img2[:,:,0] = gray
         img2[:,:,1] = gray
@@ -123,7 +123,7 @@ if __name__ == '__main__':
         app.logger.info("default timout "+str(timeout_secs))
     try:
         mathreco_port=int(os.environ["MATHRECO_PORT"])
-        print "port: ", mathreco_port
+        print ("port: ", mathreco_port)
         app.logger.info("port "+str(mathreco_port))
     except:
         mathreco_port=8686;
