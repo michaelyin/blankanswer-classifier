@@ -1,4 +1,4 @@
-service to check if an image has answer (fill blank) from a student or not.  
+Python rest service to check if an image has answer (fill blank) from a student or not.  
 
 1. setup PYTHONPATH  
 
